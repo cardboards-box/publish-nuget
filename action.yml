@@ -1,6 +1,6 @@
-name: Publish NuGet@alirezanet
-author: Alireza Sabouri (@alirezanet) - ford Rohith Reddy (@rohith)
-description: Build, Pack & Publish a NuGet package with dotnet core on project version change
+name: Publish NuGet@cardboard-box
+author: Cardboard - Alireza Sabouri (@alirezanet) - ford Rohith Reddy (@rohith)
+description: Build, Pack & Publish a NuGet package with dotnet core on project version change (forked from alirezanet/publish-nuget)
 
 inputs:
     PROJECT_FILE_PATH:
