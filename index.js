@@ -72,10 +72,10 @@ class Action {
         fs.readdirSync(".").filter(fn => /\.s?nupkg$/.test(fn)).forEach(fn => fs.unlinkSync(fn))
 
         if (!this.noBuild) {
-            this._executeInProcess(`dotnet build -c Release ${this.projectFile}`)
+            this._executeInProcess(`dotnet build -c Release -p:PackageVersion=${this.version} ${this.projectFile}`)
         }
 
-        this._executeInProcess(`dotnet pack ${this.includeSymbols ? "--include-symbols -p:SymbolPackageFormat=snupkg" : ""} -c Release ${this.projectFile} -o .`)
+        this._executeInProcess(`dotnet pack ${this.includeSymbols ? "--include-symbols -p:SymbolPackageFormat=snupkg" : ""} -p:PackageVersion=${this.version} -c Release ${this.projectFile} -o .`)
 
         const packages = fs.readdirSync(".").filter(fn => fn.endsWith("nupkg"))
         console.log(`Generated Package(s): ${packages.join(", ")}`)
