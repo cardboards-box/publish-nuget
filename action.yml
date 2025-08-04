@@ -42,6 +42,19 @@ inputs:
         description: Flag to toggle not building the project and letting pack command handle restoring & building, disabled by default
         required: false
         default: false
+    USE_GITHUB_NUGET_REGISTRY:
+        description: Flag to toggle using GitHub's NuGet registry, disabled by default - This overwrites NUGET_SOURCE
+        required: false
+        default: false
+    GITHUB_NUGET_NAMESPACE:
+        description: Namespace for the GitHub NuGet registry, defaults to the repository owner's name
+        required: false
+    GITHUB_NUGET_USERNAME:
+        description: Username for the GitHub NuGet registry, defaults to the repository owner's name
+        required: false
+    GITHUB_NUGET_TOKEN:
+        description: Personal access token for the GitHub NuGet registry, defaults to GITHUB_TOKEN
+        required: false
 
 outputs:
     VERSION:

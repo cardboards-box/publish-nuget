@@ -2,7 +2,8 @@ const os = require("os"),
     fs = require("fs"),
     path = require("path"),
     https = require("https"),
-    spawnSync = require("child_process").spawnSync
+    spawnSync = require("child_process").spawnSync,
+    github = require("@actions/github");
 
 class Action {
     constructor() {
@@ -16,7 +17,11 @@ class Action {
         this.nugetKey = process.env.INPUT_NUGET_KEY || process.env.NUGET_KEY
         this.nugetSource = process.env.INPUT_NUGET_SOURCE || process.env.NUGET_SOURCE
         this.includeSymbols = JSON.parse(process.env.INPUT_INCLUDE_SYMBOLS || process.env.INCLUDE_SYMBOLS)
-        this.noBuild = JSON.parse(process.env.INPUT_NO_BUILD || process.env.NO_BUILD)         
+        this.noBuild = JSON.parse(process.env.INPUT_NO_BUILD || process.env.NO_BUILD)
+        this.useGithubNugetRegistry = JSON.parse(process.env.INPUT_USE_GITHUB_NUGET_REGISTRY || process.env.USE_GITHUB_NUGET_REGISTRY)
+        this.githubNugetNamespace = process.env.INPUT_GITHUB_NUGET_NAMESPACE || process.env.GITHUB_NUGET_NAMESPACE || github.context.repo.owner;
+        this.githubNugetUsername = process.env.INPUT_GITHUB_NUGET_USERNAME || process.env.GITHUB_NUGET_USERNAME || github.context.repo.owner;
+        this.githubNugetToken = process.env.INPUT_GITHUB_NUGET_TOKEN || process.env.GITHUB_NUGET_TOKEN || github.token;
         this._output = []
     }
 
@@ -136,6 +141,29 @@ class Action {
         })
     }
 
+    _setNugetSource() {
+        if (!this.useGithubNugetRegistry) {
+            console.log("GitHub NuGet registry is not enabled, skipping setup")
+            return
+        }
+
+        if (!this.githubNugetNamespace || !this.githubNugetUsername || !this.githubNugetToken)
+            this._printErrorAndExit("GitHub NuGet registry is enabled but required parameters are missing")
+        
+        this.nugetSource = `https://nuget.pkg.github.com/${this.githubNugetNamespace}`
+        this.nugetKey = this.githubNugetToken
+
+        const srcCmd = `dotnet nuget add source --username ${this.githubNugetUsername} --password ${this.githubNugetToken} --store-password-in-clear-text --name github-nuget "${this.nugetSource}/index.json"`,
+            srcOutput = this._executeCommand(srcCmd, { encoding: "utf-8" }).stdout
+
+        console.log(srcOutput)
+
+        if (/error/.test(srcOutput))
+            this._printErrorAndExit(`${/error.*/.exec(srcOutput)[0]}`)
+
+        console.log(`Added GitHub NuGet source: ${this.nugetSource} with username: ${this.githubNugetUsername}`)
+    }
+
     run() {
         if (!this.projectFile || !fs.existsSync(this.projectFile))
             this._printErrorAndExit("project file not found")
@@ -160,6 +188,7 @@ class Action {
 
         console.log(`Version: ${this.version}`)
 
+        this._setNugetSource()
         this._checkForUpdate()
         this._flushOutput()
     }

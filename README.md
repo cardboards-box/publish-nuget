@@ -25,7 +25,7 @@ jobs:
       # Publish
       - name: publish on version change
         id: publish_nuget
-        uses: alirezanet/publish-nuget@v3.1.0
+        uses: cardboard-box/publish-nuget@v3.1.0
         with:
           # Filepath of the project to be packaged, relative to root of repository
           PROJECT_FILE_PATH: Core/Core.csproj
@@ -59,6 +59,18 @@ jobs:
 
           # Flag to toggle not building the project and letting pack command handle restoring & building, disabled by default
           # NO_BUILD: false
+
+          # Use github nuget registry as the source for the package
+          # USE_GITHUB_NUGET_REGISTRY: true
+
+          # The namespace of the nuget registry
+          # GITHUB_NUGET_NAMESPACE: your-repo-or-organization-name
+
+          # The username of the authentication user for the nuget
+          # GITHUB_NUGET_USERNAME: your-username
+
+          # The GitHub token to use as the nuget-api-key
+          # GITHUB_NUGET_TOKEN: ${{secrets.GITHUB_TOKEN}}
 ```
 
 - Project gets published only if there's a `NUGET_KEY` configured in the repository
